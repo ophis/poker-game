@@ -244,10 +244,17 @@ window.Renderer = (() => {
     const allHands = winnersPayload.all_hands || {};
     const isShowdown = Object.keys(allHands).length > 0;
 
+    // Aggregate winnings per player (a player can win multiple side pots)
+    const winByPlayer = {};
+    winners.forEach(w => {
+      winByPlayer[w.player_id] = (winByPlayer[w.player_id] || 0) + w.amount;
+    });
+    const uniqueWinnerIds = Object.keys(winByPlayer);
+
     // Title line: who won and how much
-    if (winners.length === 1) {
+    if (uniqueWinnerIds.length === 1) {
       const w = winners[0];
-      title.textContent = `${_playerName(w)} wins $${w.amount}!`;
+      title.textContent = `${_playerName(w)} wins $${winByPlayer[w.player_id]}!`;
     } else {
       title.textContent = 'Split Pot!';
     }
@@ -255,6 +262,23 @@ window.Renderer = (() => {
     // Details: show all hands at showdown, or just the winner's hand
     details.innerHTML = '';
     if (isShowdown) {
+      // Show the board cards
+      const s = window.GameState.get();
+      const board = s.communityCards || [];
+      if (board.length > 0) {
+        const boardRow = document.createElement('div');
+        boardRow.className = 'showdown-board';
+        const label = document.createElement('span');
+        label.className = 'showdown-board-label';
+        label.textContent = 'Board';
+        boardRow.appendChild(label);
+        const boardCards = document.createElement('span');
+        boardCards.className = 'showdown-cards';
+        board.forEach(c => boardCards.appendChild(makeCardEl(c, true)));
+        boardRow.appendChild(boardCards);
+        details.appendChild(boardRow);
+      }
+
       // Build a list of all hands sorted by score (best first)
       const hands = Object.entries(allHands)
         .map(([pid, h]) => ({ pid, ...h }))
@@ -264,11 +288,27 @@ window.Renderer = (() => {
 
       hands.forEach(h => {
         const name = h.name || h.pid;
-        const cards = (h.hole_cards || []).join(' ');
         const isWinner = winnerIds.has(h.pid);
         const line = document.createElement('div');
         line.className = 'showdown-hand' + (isWinner ? ' showdown-winner' : '');
-        line.textContent = `${name}: ${cards} — ${h.hand_name}`;
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'showdown-name';
+        nameSpan.textContent = name;
+        line.appendChild(nameSpan);
+
+        const cardsSpan = document.createElement('span');
+        cardsSpan.className = 'showdown-cards';
+        (h.hole_cards || []).forEach(c => {
+          cardsSpan.appendChild(makeCardEl(c, true, false, isWinner));
+        });
+        line.appendChild(cardsSpan);
+
+        const handSpan = document.createElement('span');
+        handSpan.className = 'showdown-hand-name';
+        handSpan.textContent = h.hand_name;
+        line.appendChild(handSpan);
+
         details.appendChild(line);
       });
     } else {
@@ -281,7 +321,17 @@ window.Renderer = (() => {
     }
 
     overlay.style.display = 'flex';
-    setTimeout(() => { overlay.style.display = 'none'; }, 5000);
+
+    // Add close button
+    const content = overlay.querySelector('.winner-content');
+    let closeBtn = content.querySelector('.winner-close');
+    if (!closeBtn) {
+      closeBtn = document.createElement('button');
+      closeBtn.className = 'winner-close';
+      closeBtn.textContent = '\u00D7';
+      closeBtn.addEventListener('click', () => { overlay.style.display = 'none'; });
+      content.appendChild(closeBtn);
+    }
   }
 
   // ---- Player action labels ------------------------------------------------

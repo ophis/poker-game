@@ -269,6 +269,24 @@ body {
   padding: 32px 48px;
   text-align: center;
   animation: popIn 0.3s ease-out;
+  position: relative;
+}
+
+.winner-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 8px;
+}
+
+.winner-close:hover {
+  color: var(--text-light);
 }
 
 .winner-content h2 {
@@ -285,8 +303,11 @@ body {
 .showdown-hand {
   font-size: 1rem;
   color: var(--text-muted);
-  padding: 4px 0;
+  padding: 8px 0;
   border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .showdown-hand:last-child {
@@ -296,6 +317,40 @@ body {
 .showdown-winner {
   color: var(--gold);
   font-weight: bold;
+}
+
+.showdown-name {
+  min-width: 80px;
+  text-align: right;
+  font-size: 0.95rem;
+}
+
+.showdown-cards {
+  display: flex;
+  gap: 4px;
+}
+
+.showdown-hand-name {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  font-style: italic;
+}
+
+.showdown-board {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+  padding-bottom: 10px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+
+.showdown-board-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 /* ===== Lobby ===== */
@@ -395,7 +450,7 @@ body {
   transition: height 0.2s;
 }
 
-.history-panel.collapsed { height: 40px; overflow: hidden; }
+.history-panel.collapsed { height: 40px; overflow: hidden; min-height: 40px; max-height: 40px; }
 .history-panel:not(.collapsed) { height: 300px; }
 
 .history-header {
@@ -405,6 +460,8 @@ body {
   border-bottom: 1px solid rgba(255,255,255,0.08);
   user-select: none;
 }
+
+.history-panel.collapsed .history-messages { display: none; }
 
 .history-messages {
   flex: 1;
