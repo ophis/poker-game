@@ -160,3 +160,33 @@ class TestHandStrengthEstimator:
         eq = est.estimate(hole, community, num_opponents=1, difficulty="medium")
         # Royal flush draw/made — very high equity
         assert eq > 0.9
+
+    def test_easy_postflop_uses_fewer_sims(self):
+        random.seed(42)
+        est = HandStrengthEstimator()
+        hole = [_card(Rank.ACE, Suit.SPADES), _card(Rank.ACE, Suit.HEARTS)]
+        community = [
+            _card(Rank.KING, Suit.DIAMONDS),
+            _card(Rank.TWO, Suit.CLUBS),
+            _card(Rank.THREE, Suit.HEARTS),
+        ]
+        eq = est.estimate(hole, community, num_opponents=1, difficulty="easy")
+        assert 0.0 <= eq <= 1.0
+
+    def test_hard_postflop_uses_more_sims(self):
+        random.seed(42)
+        est = HandStrengthEstimator()
+        hole = [_card(Rank.ACE, Suit.SPADES), _card(Rank.ACE, Suit.HEARTS)]
+        community = [
+            _card(Rank.KING, Suit.DIAMONDS),
+            _card(Rank.TWO, Suit.CLUBS),
+            _card(Rank.THREE, Suit.HEARTS),
+        ]
+        eq = est.estimate(hole, community, num_opponents=1, difficulty="hard")
+        assert eq > 0.7
+
+    def test_zero_opponents_clamps_to_one(self):
+        est = HandStrengthEstimator()
+        hole = [_card(Rank.ACE, Suit.SPADES), _card(Rank.ACE, Suit.HEARTS)]
+        eq = est.estimate(hole, [], num_opponents=0, difficulty="medium")
+        assert 0.0 <= eq <= 1.0

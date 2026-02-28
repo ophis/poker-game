@@ -107,3 +107,48 @@ class TestSidePots:
         pm.add_contribution("p3", 100)
         pots = pm.calculate_side_pots(["p1", "p2", "p3"])
         assert sum(p.amount for p in pots) == pm.total
+
+    def test_none_active_uses_all_contributors(self):
+        """When active_player_ids is None, all contributors are eligible."""
+        pm = PotManager()
+        pm.add_contribution("p1", 100)
+        pm.add_contribution("p2", 100)
+        pots = pm.calculate_side_pots(None)
+        assert len(pots) == 1
+        assert set(pots[0].eligible_player_ids) == {"p1", "p2"}
+
+    def test_zero_contributions_returns_empty(self):
+        """When all contributions are zero, return empty."""
+        pm = PotManager()
+        # No contributions at all
+        pots = pm.calculate_side_pots(["p1"])
+        assert pots == []
+
+
+class TestPotManagerExtras:
+    def test_negative_contribution_raises(self):
+        pm = PotManager()
+        with pytest.raises(ValueError):
+            pm.add_contribution("p1", -10)
+
+    def test_get_simple_total(self):
+        pm = PotManager()
+        pm.add_contribution("p1", 50)
+        pm.add_contribution("p2", 100)
+        assert pm.get_simple_total() == 150
+
+    def test_contributions_snapshot(self):
+        pm = PotManager()
+        pm.add_contribution("p1", 50)
+        pm.add_contribution("p2", 100)
+        snap = pm.contributions_snapshot()
+        assert snap == {"p1": 50, "p2": 100}
+        # Snapshot is a copy
+        snap["p1"] = 999
+        assert pm.get_contribution("p1") == 50
+
+    def test_side_pot_repr(self):
+        sp = SidePot(amount=100, eligible_player_ids=["p1", "p2"])
+        r = repr(sp)
+        assert "100" in r
+        assert "p1" in r

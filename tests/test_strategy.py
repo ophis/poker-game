@@ -122,6 +122,21 @@ class TestEasyStrategy:
         assert action == BettingAction.CHECK
         assert amount == 0
 
+    def test_raises_with_high_equity_can_check(self):
+        """Easy bot: equity > 0.7, can_check, can_raise, random < 0.3 → RAISE."""
+        engine = StrategyEngine()
+        state = _make_state(pot=200)
+        valid = _make_valid(can_check=True, can_raise=True)
+        found_raise = False
+        for seed in range(100):
+            random.seed(seed)
+            action, amount = engine._easy(state, state.players[0], valid, equity=0.8)
+            if action == BettingAction.RAISE:
+                found_raise = True
+                assert amount >= valid.min_raise
+                break
+        assert found_raise
+
     def test_folds_weak_hand_when_must_call(self):
         engine = StrategyEngine()
         state = _make_state()
@@ -137,6 +152,20 @@ class TestEasyStrategy:
         action, _ = engine._easy(state, state.players[0], valid, equity=0.6)
         assert action == BettingAction.CALL
 
+    def test_raises_high_equity_facing_bet(self):
+        """Easy bot: equity > 0.7, can_raise, facing bet, random < 0.2 → RAISE."""
+        engine = StrategyEngine()
+        state = _make_state(pot=200)
+        valid = _make_valid(can_check=False, call_amount=20, can_raise=True)
+        found_raise = False
+        for seed in range(200):
+            random.seed(seed)
+            action, amount = engine._easy(state, state.players[0], valid, equity=0.8)
+            if action == BettingAction.RAISE:
+                found_raise = True
+                break
+        assert found_raise
+
 
 class TestMediumStrategy:
     def test_raises_strong_hand_can_check(self):
@@ -147,6 +176,20 @@ class TestMediumStrategy:
         assert action == BettingAction.RAISE
         assert amount > 0
 
+    def test_raises_medium_equity_can_check(self):
+        """Medium bot: 0.5 < equity < 0.65, can_check, can_raise, random < 0.3 → RAISE."""
+        engine = StrategyEngine()
+        state = _make_state(pot=200)
+        valid = _make_valid(can_check=True, can_raise=True)
+        found_raise = False
+        for seed in range(200):
+            random.seed(seed)
+            action, amount = engine._medium(state, state.players[0], valid, equity=0.55)
+            if action == BettingAction.RAISE:
+                found_raise = True
+                break
+        assert found_raise
+
     def test_folds_below_pot_odds(self):
         engine = StrategyEngine()
         state = _make_state(pot=10)
@@ -154,6 +197,28 @@ class TestMediumStrategy:
         # pot_odds = 100 / (10 + 100) ≈ 0.909, equity 0.5 < 0.909
         action, _ = engine._medium(state, state.players[0], valid, equity=0.5)
         assert action == BettingAction.FOLD
+
+    def test_raises_strong_facing_bet(self):
+        """Medium bot: equity > 0.7, can_raise, facing bet → RAISE."""
+        engine = StrategyEngine()
+        state = _make_state(pot=200)
+        valid = _make_valid(can_check=False, call_amount=20, can_raise=True)
+        action, amount = engine._medium(state, state.players[0], valid, equity=0.75)
+        assert action == BettingAction.RAISE
+
+    def test_raises_medium_facing_bet(self):
+        """Medium bot: 0.55 < equity < 0.7, can_raise, random < 0.4 → RAISE."""
+        engine = StrategyEngine()
+        state = _make_state(pot=200)
+        valid = _make_valid(can_check=False, call_amount=20, can_raise=True)
+        found_raise = False
+        for seed in range(200):
+            random.seed(seed)
+            action, _ = engine._medium(state, state.players[0], valid, equity=0.6)
+            if action == BettingAction.RAISE:
+                found_raise = True
+                break
+        assert found_raise
 
     def test_calls_above_pot_odds(self):
         engine = StrategyEngine()
@@ -173,6 +238,36 @@ class TestHardStrategy:
         action, _ = engine._hard(state, state.players[0], valid, equity=0.8)
         assert action == BettingAction.RAISE
 
+    def test_bluff_raises_can_check(self):
+        """Hard bot: in position, random < 0.15, can_check, can_raise → bluff RAISE."""
+        engine = StrategyEngine()
+        state = _make_state(num_players=3, dealer_index=0)
+        player = state.players[2]  # in position
+        valid = _make_valid(can_check=True, can_raise=True)
+        found_bluff = False
+        for seed in range(200):
+            random.seed(seed)
+            action, _ = engine._hard(state, player, valid, equity=0.3)
+            if action == BettingAction.RAISE:
+                found_bluff = True
+                break
+        assert found_bluff
+
+    def test_bluff_raises_facing_bet(self):
+        """Hard bot: in position, random < 0.15, facing bet, can_raise → bluff RAISE."""
+        engine = StrategyEngine()
+        state = _make_state(num_players=3, dealer_index=0)
+        player = state.players[2]  # in position
+        valid = _make_valid(can_check=False, call_amount=20, can_raise=True)
+        found_bluff = False
+        for seed in range(200):
+            random.seed(seed)
+            action, _ = engine._hard(state, player, valid, equity=0.3)
+            if action == BettingAction.RAISE:
+                found_bluff = True
+                break
+        assert found_bluff
+
     def test_folds_weak_hand_no_bluff(self):
         engine = StrategyEngine()
         state = _make_state(pot=10)
@@ -180,6 +275,40 @@ class TestHardStrategy:
         random.seed(99)  # no bluff (0.15 threshold)
         action, _ = engine._hard(state, state.players[0], valid, equity=0.01)
         assert action == BettingAction.FOLD
+
+    def test_value_raise_facing_bet(self):
+        """Hard bot: equity > 0.75, can_raise, facing bet → value RAISE."""
+        engine = StrategyEngine()
+        state = _make_state(pot=200)
+        valid = _make_valid(can_check=False, call_amount=20, can_raise=True)
+        random.seed(999)  # avoid bluff
+        action, _ = engine._hard(state, state.players[0], valid, equity=0.8)
+        assert action == BettingAction.RAISE
+
+    def test_raise_medium_equity_in_position(self):
+        """Hard bot: 0.55 < equity, in_position, 50% chance → RAISE."""
+        engine = StrategyEngine()
+        state = _make_state(num_players=3, dealer_index=0)
+        player = state.players[2]  # in position
+        valid = _make_valid(can_check=False, call_amount=20, can_raise=True)
+        found_raise = False
+        for seed in range(200):
+            random.seed(seed)
+            action, _ = engine._hard(state, player, valid, equity=0.6)
+            if action == BettingAction.RAISE:
+                found_raise = True
+                break
+        assert found_raise
+
+    def test_call_fallback(self):
+        """Hard bot: decent equity, not strong enough, no bluff, can_raise=False → CALL."""
+        random.seed(999)
+        engine = StrategyEngine()
+        state = _make_state(pot=200)
+        valid = _make_valid(can_check=False, call_amount=20, can_raise=False)
+        action, amount = engine._hard(state, state.players[0], valid, equity=0.5)
+        assert action == BettingAction.CALL
+        assert amount == 20
 
     def test_decide_routes_to_difficulty(self):
         engine = StrategyEngine()

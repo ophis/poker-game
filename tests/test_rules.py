@@ -203,3 +203,30 @@ class TestGameStateProperties:
         state = _make_state(num_players=3)
         assert state.player_index("p2") == 2
         assert state.player_index("unknown") == -1
+
+
+class TestAdvanceDealerFallback:
+    def test_no_active_players_stays(self):
+        """When no active seat found, dealer index stays unchanged."""
+        state = _make_state(num_players=2, dealer_index=0)
+        state.players[0].is_sitting_out = True
+        state.players[1].is_sitting_out = True
+        new = advance_dealer(state)
+        assert new == 0  # fallback
+
+
+class TestPlayerToDict:
+    def test_to_dict(self):
+        from app.game.player import Player
+        p = Player(
+            player_id="p1", name="Alice", chips=1000,
+            is_bot=True, bot_difficulty="hard", seat=2, is_connected=True,
+        )
+        d = p.to_dict()
+        assert d["player_id"] == "p1"
+        assert d["name"] == "Alice"
+        assert d["chips"] == 1000
+        assert d["is_bot"] is True
+        assert d["bot_difficulty"] == "hard"
+        assert d["seat"] == 2
+        assert d["is_connected"] is True

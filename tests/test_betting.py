@@ -280,3 +280,54 @@ class TestRoundCompletion:
         br.apply_action("p0", BettingAction.FOLD)
         r = br.apply_action("p1", BettingAction.FOLD)
         assert r == BettingResult.ALL_FOLDED
+
+
+class TestFLHERaise:
+    def test_flhe_raise_uses_fixed_bet(self):
+        """FLHE raise: total_bet = current_bet + fixed_bet."""
+        state = _make_state(variant=GameVariant.FIXED_LIMIT, big_blind=20)
+        state.current_player_index = 0
+        br = BettingRound(state, 0, GamePhase.FLOP)
+        # fixed_bet = BB = 20 for flop
+        br.apply_action("p0", BettingAction.RAISE)
+        assert state.players[0].bet == 20  # 0 + 20
+
+    def test_flhe_raise_turn_doubles(self):
+        state = _make_state(variant=GameVariant.FIXED_LIMIT, big_blind=20)
+        state.current_player_index = 0
+        br = BettingRound(state, 0, GamePhase.TURN)
+        # fixed_bet = 2*BB = 40 for turn
+        br.apply_action("p0", BettingAction.RAISE)
+        assert state.players[0].bet == 40
+
+
+class TestRaiseWhenCantRaise:
+    def test_raise_not_allowed_raises_error(self):
+        state = _make_state(variant=GameVariant.FIXED_LIMIT, big_blind=20)
+        state.current_player_index = 0
+        br = BettingRound(state, 0, GamePhase.FLOP)
+        br._num_raises = 4  # at cap
+        with pytest.raises(ValueError, match="cannot raise"):
+            br.apply_action("p0", BettingAction.RAISE)
+
+
+class TestUnknownAction:
+    def test_unknown_action_raises(self):
+        """Passing an invalid action string should raise ValueError."""
+        state = _make_state()
+        state.current_player_index = 0
+        br = BettingRound(state, 0, GamePhase.FLOP)
+        with pytest.raises(ValueError, match="Unknown action"):
+            br.apply_action("p0", "invalid_action")
+
+
+class TestAdvanceWhenNoPlayersCanAct:
+    def test_all_folded_or_all_in(self):
+        state = _make_state(num_players=3)
+        state.current_player_index = 0
+        state.players[1].is_all_in = True
+        state.players[2].is_all_in = True
+        br = BettingRound(state, 0, GamePhase.FLOP)
+        br.apply_action("p0", BettingAction.FOLD)
+        # After fold, all others are all-in, round should complete
+        assert state.current_player_index == -1 or br.next_to_act() is None

@@ -121,6 +121,31 @@ class TestRankToString:
         assert rank_to_string(eval_5(cards)) == "High Card"
 
 
+class TestEvalBest:
+    def test_eval_best_5_cards(self):
+        cards = make_cards('Ah', 'Kh', 'Qh', 'Jh', '10h')
+        from app.core.hand_evaluator import eval_best
+        assert eval_best(cards) == 1
+
+    def test_eval_best_6_cards(self):
+        from app.core.hand_evaluator import eval_best
+        cards = make_cards('Ah', 'Kh', 'Qh', 'Jh', '10h', '2c')
+        score = eval_best(cards)
+        assert score == 1  # Royal flush from best 5
+
+    def test_eval_best_7_cards(self):
+        from app.core.hand_evaluator import eval_best
+        cards = make_cards('Ah', 'Kh', 'Qh', 'Jh', '10h', '2c', '3d')
+        score = eval_best(cards)
+        assert score == 1
+
+    def test_eval_best_invalid_count(self):
+        from app.core.hand_evaluator import eval_best
+        cards = make_cards('Ah', 'Kh', 'Qh', 'Jh')
+        with pytest.raises(ValueError):
+            eval_best(cards)
+
+
 class TestCardEncoding:
     def test_all_52_cards_unique(self):
         deck = Deck()
@@ -133,3 +158,46 @@ class TestCardEncoding:
         assert str(c) == "Ah"
         c2 = Card(Rank.TEN, Suit.CLUBS)
         assert str(c2) == "10c"
+
+    def test_card_repr(self):
+        c = Card(Rank.ACE, Suit.HEARTS)
+        assert repr(c) == "Card(Ah)"
+
+    def test_suit_str(self):
+        assert str(Suit.HEARTS) == "h"
+        assert str(Suit.SPADES) == "s"
+
+    def test_suit_symbol(self):
+        assert Suit.HEARTS.symbol == "h"
+
+    def test_rank_str(self):
+        assert str(Rank.ACE) == "A"
+        assert str(Rank.TEN) == "10"
+
+    def test_rank_lt(self):
+        assert Rank.TWO < Rank.ACE
+        assert not (Rank.ACE < Rank.KING)
+
+    def test_deck_shuffle(self):
+        deck = Deck()
+        cards_before = list(deck._cards)
+        deck.shuffle()
+        # Shuffled — same cards, possibly different order
+        assert len(deck._cards) == 52
+
+    def test_deck_deal(self):
+        deck = Deck()
+        cards = deck.deal(5)
+        assert len(cards) == 5
+        assert len(deck) == 47
+
+    def test_deck_deal_one(self):
+        deck = Deck()
+        card = deck.deal_one()
+        assert isinstance(card, Card)
+        assert len(deck) == 51
+
+    def test_deck_deal_too_many(self):
+        deck = Deck()
+        with pytest.raises(ValueError):
+            deck.deal(53)
