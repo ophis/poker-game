@@ -72,6 +72,7 @@ window.Renderer = (() => {
     _renderPot(s);
     _renderPhase(s);
     _renderHoleCards(s);
+    _renderActionHistory(s);
   }
 
   function _renderSeats(s) {
@@ -169,6 +170,59 @@ window.Renderer = (() => {
       el.dataset.cards = key;
       el.innerHTML = '';
       cards.forEach(c => el.appendChild(makeCardEl(c, false, true)));
+    }
+  }
+
+  // ---- Action history panel -------------------------------------------------
+  function _actionColorClass(action) {
+    const map = { fold: 'hist-fold', check: 'hist-check', call: 'hist-call',
+                  raise: 'hist-raise', bet: 'hist-raise', all_in: 'hist-allin', 'all-in': 'hist-allin' };
+    return map[action] || '';
+  }
+
+  function _renderActionHistory(s) {
+    const container = document.getElementById('history-messages');
+    if (!container) return;
+    const history = s.actionHistory || [];
+    const childCount = container.children.length;
+
+    // History was cleared — reset DOM
+    if (history.length < childCount) {
+      container.innerHTML = '';
+    }
+
+    // Append only new entries
+    for (let i = container.children.length; i < history.length; i++) {
+      const entry = history[i];
+      const div = document.createElement('div');
+
+      if (entry.type === 'phase') {
+        div.className = 'hist-phase';
+        div.textContent = `\u2014 ${entry.text} \u2014`;
+      } else if (entry.type === 'winner') {
+        div.className = 'hist-winner';
+        div.textContent = entry.text;
+      } else {
+        div.className = 'hist-entry';
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'hist-name';
+        nameSpan.textContent = entry.name + ': ';
+        const actionSpan = document.createElement('span');
+        actionSpan.className = _actionColorClass(entry.action);
+        let actionText = entry.action.toUpperCase().replace('_', ' ');
+        if (['raise', 'bet', 'call', 'all_in', 'all-in'].includes(entry.action) && entry.amount > 0) {
+          actionText += ' $' + entry.amount.toLocaleString();
+        }
+        actionSpan.textContent = actionText;
+        div.appendChild(nameSpan);
+        div.appendChild(actionSpan);
+      }
+
+      container.appendChild(div);
+    }
+
+    if (history.length > childCount) {
+      container.scrollTop = container.scrollHeight;
     }
   }
 

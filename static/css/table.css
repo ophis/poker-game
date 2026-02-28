@@ -380,6 +380,68 @@ body {
 
 .modal-buttons { display: flex; gap: 12px; margin-top: 16px; }
 
+/* ===== Action History ===== */
+.history-panel {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  width: 240px;
+  background: rgba(0,0,0,0.85);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  transition: height 0.2s;
+}
+
+.history-panel.collapsed { height: 40px; overflow: hidden; }
+.history-panel:not(.collapsed) { height: 300px; }
+
+.history-header {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  user-select: none;
+}
+
+.history-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 12px;
+  font-size: 0.78rem;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.hist-entry { word-break: break-word; }
+.hist-name { color: var(--text-muted); }
+.hist-fold { color: #e06060; }
+.hist-check { color: #60c060; }
+.hist-call { color: #60b0e0; }
+.hist-raise { color: var(--gold); }
+.hist-allin { color: #ff6060; font-weight: bold; }
+
+.hist-phase {
+  text-align: center;
+  color: rgba(255,255,255,0.35);
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  padding: 4px 0;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  margin-top: 2px;
+}
+
+.hist-winner {
+  color: var(--gold);
+  font-weight: bold;
+  padding: 3px 0;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  margin-top: 2px;
+}
+
 /* ===== Chat ===== */
 .chat-panel {
   position: fixed;

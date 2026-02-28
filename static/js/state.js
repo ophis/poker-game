@@ -23,10 +23,19 @@ window.GameState = (() => {
     myHoleCards: [],
     lastWinners: null,
     chatMessages: [],
+    actionHistory: [],
   };
 
   function update(patch) {
     Object.assign(_state, patch);
+  }
+
+  function addAction(entry) {
+    _state.actionHistory.push(entry);
+  }
+
+  function clearActions() {
+    _state.actionHistory = [];
   }
 
   function applyGameState(payload) {
@@ -56,5 +65,5 @@ window.GameState = (() => {
     return _state;
   }
 
-  return { update, applyGameState, getMe, get };
+  return { update, applyGameState, getMe, get, addAction, clearActions };
 })();

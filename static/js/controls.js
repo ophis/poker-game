@@ -12,6 +12,7 @@ window.Controls = (() => {
     _bindBetShortcuts();
     _bindChat();
     _bindChatToggle();
+    _bindHistoryToggle();
   }
 
   function _bindActionButtons() {
@@ -112,6 +113,13 @@ window.Controls = (() => {
       // Hide unread badge
       const badge = document.getElementById('chat-badge');
       if (badge) badge.style.display = 'none';
+    });
+  }
+
+  function _bindHistoryToggle() {
+    document.getElementById('history-toggle')?.addEventListener('click', () => {
+      const panel = document.getElementById('action-history');
+      if (panel) panel.classList.toggle('collapsed');
     });
   }
 

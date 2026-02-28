@@ -53,6 +53,7 @@ window.PokerWS = (() => {
         break;
 
       case 'hand_starting':
+        window.GameState.clearActions();
         window.GameState.applyGameState(payload);
         window.GameState.update({ lastWinners: null, myTurn: false, validActions: null });
         window.Renderer.clearActionLabels();
@@ -61,10 +62,15 @@ window.PokerWS = (() => {
         window.Renderer.showHandName('');
         break;
 
-      case 'community_card':
+      case 'community_card': {
+        const phase = (payload.phase || '').toUpperCase().replace(/_/g, ' ');
+        if (phase) {
+          window.GameState.addAction({ type: 'phase', text: phase });
+        }
         window.GameState.applyGameState(payload);
         window.Renderer.render();
         break;
+      }
 
       case 'your_turn':
         if (payload.player_id === _playerId) {
@@ -79,6 +85,12 @@ window.PokerWS = (() => {
       case 'action_taken':
         // Update pot immediately
         window.GameState.update({ pot: payload.pot });
+        window.GameState.addAction({
+          type: 'action',
+          name: payload.name,
+          action: payload.action,
+          amount: payload.amount,
+        });
         window.Renderer.render();
         window.Renderer.showPlayerAction(payload.player_id, payload.action, payload.amount);
         if (payload.player_id === _playerId) {
@@ -92,7 +104,15 @@ window.PokerWS = (() => {
         window.Renderer.render();
         break;
 
-      case 'winner':
+      case 'winner': {
+        const winners = payload.winners || [];
+        winners.forEach(w => {
+          const wName = _getPlayerName(w.player_id);
+          window.GameState.addAction({
+            type: 'winner',
+            text: `${wName} wins $${w.amount}`,
+          });
+        });
         window.GameState.update({ lastWinners: payload });
         // Reveal all players' hole cards in the seats for the showdown.
         // The server sends all_hands explicitly here — this is the only place
@@ -109,6 +129,7 @@ window.PokerWS = (() => {
         }
         window.Renderer.showWinner(payload);
         break;
+      }
 
       case 'hand_over':
         window.GameState.applyGameState(payload);
