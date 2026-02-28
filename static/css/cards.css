@@ -1,0 +1,98 @@
+/* ===== CSS Card Rendering (Unicode suits, no images) ===== */
+
+.card {
+  width: 58px;
+  height: 82px;
+  background: var(--card-white);
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 3px 5px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 0.95rem;
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  user-select: none;
+  position: relative;
+  transition: transform 0.15s;
+}
+
+.card.red  { color: var(--card-red); }
+.card.black { color: var(--card-black); }
+
+/* Hidden / back-of-card */
+.card.hidden {
+  background: linear-gradient(135deg, #1a237e 25%, #283593 50%, #1a237e 75%);
+  color: transparent;
+  border-color: #3949ab;
+}
+
+.card.hidden::after {
+  content: '🂠';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2.5rem;
+  color: rgba(255,255,255,0.3);
+}
+
+.card-corner {
+  line-height: 1;
+}
+
+.card-rank {
+  display: block;
+  font-size: 1rem;
+}
+
+.card-suit-small {
+  display: block;
+  font-size: 0.8rem;
+}
+
+/* Center pip */
+.card-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.6rem;
+}
+
+/* Bottom corner (upside-down) */
+.card-corner.bottom {
+  align-self: flex-end;
+  transform: rotate(180deg);
+}
+
+/* Smaller card variant for opponent seats */
+.card.small {
+  width: 36px;
+  height: 52px;
+  font-size: 0.65rem;
+  border-radius: 4px;
+  padding: 2px 3px;
+}
+
+.card.small .card-rank { font-size: 0.7rem; }
+.card.small .card-suit-small { font-size: 0.55rem; }
+.card.small .card-center { font-size: 1rem; }
+
+/* Deal animation */
+@keyframes dealCard {
+  from { transform: translateY(-30px) scale(0.8); opacity: 0; }
+  to   { transform: translateY(0) scale(1);   opacity: 1; }
+}
+
+.card.deal-anim {
+  animation: dealCard 0.25s ease-out forwards;
+}
+
+/* Highlight winning cards */
+.card.winner-card {
+  box-shadow: 0 0 0 3px var(--gold), 0 4px 12px rgba(0,0,0,0.6);
+  transform: translateY(-4px);
+}

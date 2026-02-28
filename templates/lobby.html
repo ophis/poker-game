@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}Poker Lobby{% endblock %}
+
+{% block content %}
+<div class="lobby-container">
+  <header class="lobby-header">
+    <h1>♠ Texas Hold'em Poker ♥</h1>
+  </header>
+
+  <div class="lobby-columns">
+    <!-- Create Game Form -->
+    <section class="lobby-create card-panel">
+      <h2>Create New Game</h2>
+      <form id="create-game-form">
+        <div class="form-group">
+          <label for="player-name">Your Name</label>
+          <input type="text" id="player-name" name="player_name" maxlength="30"
+                 placeholder="Enter your name" required />
+        </div>
+
+        <div class="form-group">
+          <label for="variant">Variant</label>
+          <select id="variant" name="variant">
+            <option value="no_limit">No-Limit Hold'em</option>
+            <option value="fixed_limit">Fixed-Limit Hold'em</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="small-blind">Small Blind</label>
+            <input type="number" id="small-blind" name="small_blind" value="10" min="1" />
+          </div>
+          <div class="form-group">
+            <label for="big-blind">Big Blind</label>
+            <input type="number" id="big-blind" name="big_blind" value="20" min="2" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="max-players">Max Players</label>
+            <select id="max-players" name="max_players">
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6" selected>6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="buy-in">Buy-in</label>
+            <input type="number" id="buy-in" name="buy_in" value="1000" min="1" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="num-bots">AI Bots</label>
+            <select id="num-bots" name="num_bots">
+              <option value="0">0 (humans only)</option>
+              <option value="1">1 Bot</option>
+              <option value="2" selected>2 Bots</option>
+              <option value="3">3 Bots</option>
+              <option value="4">4 Bots</option>
+              <option value="5">5 Bots</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="bot-difficulty">Bot Difficulty</label>
+            <select id="bot-difficulty" name="bot_difficulty">
+              <option value="easy">Easy</option>
+              <option value="medium" selected>Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg">Create & Join Game</button>
+        <div id="create-error" class="error-msg" style="display:none;"></div>
+      </form>
+    </section>
+
+    <!-- Open Games -->
+    <section class="lobby-games card-panel">
+      <h2>Open Games</h2>
+      <div id="games-list">
+        {% if games %}
+          {% for game in games %}
+          <div class="game-entry" data-game-id="{{ game.game_id }}">
+            <div class="game-info">
+              <strong>{{ game.variant | replace('_', ' ') | title }}</strong>
+              <span class="blinds">{{ game.small_blind }}/{{ game.big_blind }}</span>
+              <span class="players">{{ game.players }}/{{ game.max_players }} players</span>
+              <span class="phase badge">{{ game.phase }}</span>
+            </div>
+            <button class="btn btn-secondary join-btn" data-game-id="{{ game.game_id }}">
+              Join
+            </button>
+          </div>
+          {% endfor %}
+        {% else %}
+          <p class="no-games">No open games. Create one!</p>
+        {% endif %}
+      </div>
+      <button id="refresh-btn" class="btn btn-ghost">↻ Refresh</button>
+    </section>
+  </div>
+</div>
+
+<!-- Join modal -->
+<div id="join-modal" class="modal" style="display:none;">
+  <div class="modal-content card-panel">
+    <h2>Join Game</h2>
+    <form id="join-form">
+      <div class="form-group">
+        <label for="join-name">Your Name</label>
+        <input type="text" id="join-name" maxlength="30" placeholder="Enter your name" required />
+      </div>
+      <div class="form-group">
+        <label for="join-buyin">Buy-in</label>
+        <input type="number" id="join-buyin" value="1000" min="1" />
+      </div>
+      <input type="hidden" id="join-game-id" />
+      <div class="modal-buttons">
+        <button type="submit" class="btn btn-primary">Join</button>
+        <button type="button" id="join-cancel" class="btn btn-ghost">Cancel</button>
+      </div>
+      <div id="join-error" class="error-msg" style="display:none;"></div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/lobby.js"></script>
+{% endblock %}

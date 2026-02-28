@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Poker Table — {{ game_id }}{% endblock %}
+
+{% block extra_head %}
+<meta name="game-id" content="{{ game_id }}" />
+<meta name="variant" content="{{ variant }}" />
+{% endblock %}
+
+{% block content %}
+<div id="game-root">
+  <!-- Connection status -->
+  <div id="connection-banner" class="connection-banner connecting">
+    Connecting...
+  </div>
+
+  <!-- Poker Table -->
+  <div id="poker-table" class="poker-table">
+    <!-- Player seats (JS fills these in) -->
+    <div id="seats-container"></div>
+
+    <!-- Center: community cards + pot -->
+    <div id="table-center" class="table-center">
+      <div id="community-cards" class="community-cards"></div>
+      <div id="pot-display" class="pot-display">
+        <span class="pot-label">Pot</span>
+        <span id="pot-amount">0</span>
+      </div>
+      <div id="phase-display" class="phase-display"></div>
+    </div>
+  </div>
+
+  <!-- Hole cards + action controls -->
+  <div id="player-panel" class="player-panel">
+    <div id="hole-cards" class="hole-cards"></div>
+
+    <div id="action-controls" class="action-controls" style="display:none;">
+      <button id="btn-fold" class="btn btn-fold">Fold</button>
+      <button id="btn-check" class="btn btn-check" style="display:none;">Check</button>
+      <button id="btn-call" class="btn btn-call" style="display:none;">Call <span id="call-amount"></span></button>
+      <div id="raise-group" class="raise-group" style="display:none;">
+        <div class="raise-shortcuts">
+          <button class="btn btn-sm bet-shortcut" data-fraction="0.5">½ Pot</button>
+          <button class="btn btn-sm bet-shortcut" data-fraction="1">Pot</button>
+          <button class="btn btn-sm bet-shortcut" data-allin="true">All-in</button>
+        </div>
+        <input type="range" id="raise-slider" class="raise-slider" min="0" max="1000" value="0" />
+        <div class="raise-amount-row">
+          <span class="raise-label">Raise to:</span>
+          <input type="number" id="raise-input" class="raise-input" min="0" value="0" />
+        </div>
+        <button id="btn-raise" class="btn btn-raise">Raise</button>
+      </div>
+    </div>
+
+    <div id="hand-name-display" class="hand-name-display"></div>
+  </div>
+
+  <!-- Chat panel -->
+  <div id="chat-panel" class="chat-panel collapsed">
+    <div class="chat-header" id="chat-toggle">
+      💬 Chat <span id="chat-badge" class="chat-badge" style="display:none;">!</span>
+    </div>
+    <div id="chat-messages" class="chat-messages"></div>
+    <div class="chat-input-row">
+      <input type="text" id="chat-input" maxlength="200" placeholder="Type a message..." />
+      <button id="chat-send" class="btn btn-sm">Send</button>
+    </div>
+  </div>
+
+  <!-- Winner announcement overlay -->
+  <div id="winner-overlay" class="winner-overlay" style="display:none;">
+    <div class="winner-content">
+      <h2 id="winner-title">Winner!</h2>
+      <div id="winner-details"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/state.js"></script>
+<script src="/static/js/renderer.js"></script>
+<script src="/static/js/controls.js"></script>
+<script src="/static/js/websocket.js"></script>
+{% endblock %}

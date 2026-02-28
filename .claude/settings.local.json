@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "Bash(cd \"/Volumes/Storage/Personal/Playground/Claude/poker game\" && python3 -m pytest tests/test_hand_evaluator.py tests/test_pot.py -v 2>&1)",
+      "Bash(cd \"/Volumes/Storage/Personal/Playground/Claude/poker game\" && python3 -c \"import fastapi, uvicorn, pydantic, jinja2; print\\('All imports OK'\\)\" 2>&1)",
+      "Bash(cd \"/Volumes/Storage/Personal/Playground/Claude/poker game\" && python3 -c \"from app.main import app; print\\('App created OK', app.title\\)\" 2>&1)",
+      "Bash(cd \"/Volumes/Storage/Personal/Playground/Claude/poker game\" && python3 -m pytest tests/ -v 2>&1)",
+      "Bash(cd \"/Volumes/Storage/Personal/Playground/Claude/poker game\" && python3 cli.py --watch --hands 2 --bots 4 2>&1)",
+      "Bash(cd \"/Volumes/Storage/Personal/Playground/Claude/poker game\" && echo -e \"c\\\\nf\\\\nc\\\\nc\\\\nc\\\\nc\" | python3 cli.py --hands 2 --bots 2 2>&1)"
+    ]
+  }
+}
