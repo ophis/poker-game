@@ -41,7 +41,7 @@ Supports both **No-Limit** and **Fixed-Limit** Hold'em. Human players connect vi
 pip install -r requirements.txt
 
 # 2. Start the server
-python run.py
+python3 run.py
 
 # 3. Open the lobby
 open http://localhost:8000
@@ -56,7 +56,7 @@ To play with a second human player, open `http://localhost:8000` in another brow
 ## Running Tests
 
 ```bash
-python -m pytest tests/ -v
+python3 -m pytest tests/ -v
 ```
 
 The test suite covers the hand evaluator and pot manager — the two most critical correctness requirements:

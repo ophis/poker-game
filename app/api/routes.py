@@ -20,7 +20,7 @@ router = APIRouter()
 async def lobby_page(request: Request):
     templates = request.app.state.templates
     games = game_manager.list_games()
-    return templates.TemplateResponse("lobby.html", {"request": request, "games": games})
+    return templates.TemplateResponse(request, "lobby.html", {"games": games})
 
 
 @router.get("/game/{game_id}", response_class=HTMLResponse)
@@ -29,8 +29,7 @@ async def game_page(request: Request, game_id: str):
     game = game_manager.get_game(game_id)
     if not game:
         raise HTTPException(status_code=404, detail="Game not found")
-    return templates.TemplateResponse("game.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "game.html", {
         "game_id": game_id,
         "variant": game.state.variant.value,
     })
