@@ -205,10 +205,10 @@ class PokerGame:
         self.state.phase = GamePhase.FLOP
         for card in self._deck.deal(3):
             self.state.community_cards.append(card)
-        await self._broadcast("community_card", self._state_payload_factory)
+        self._reset_street_bets()
         first = first_to_act_postflop(self.state)
         self.state.current_player_index = first
-        self._reset_street_bets()
+        await self._broadcast("community_card", self._state_payload_factory)
         result = await self._run_betting_round(GamePhase.FLOP)
         if result == BettingResult.ALL_FOLDED:
             await self._award_to_last_remaining()
@@ -218,10 +218,10 @@ class PokerGame:
         await asyncio.sleep(1.5)
         self.state.phase = GamePhase.TURN
         self.state.community_cards.append(self._deck.deal_one())
-        await self._broadcast("community_card", self._state_payload_factory)
+        self._reset_street_bets()
         first = first_to_act_postflop(self.state)
         self.state.current_player_index = first
-        self._reset_street_bets()
+        await self._broadcast("community_card", self._state_payload_factory)
         result = await self._run_betting_round(GamePhase.TURN)
         if result == BettingResult.ALL_FOLDED:
             await self._award_to_last_remaining()
@@ -231,10 +231,10 @@ class PokerGame:
         await asyncio.sleep(1.5)
         self.state.phase = GamePhase.RIVER
         self.state.community_cards.append(self._deck.deal_one())
-        await self._broadcast("community_card", self._state_payload_factory)
+        self._reset_street_bets()
         first = first_to_act_postflop(self.state)
         self.state.current_player_index = first
-        self._reset_street_bets()
+        await self._broadcast("community_card", self._state_payload_factory)
         result = await self._run_betting_round(GamePhase.RIVER)
         if result == BettingResult.ALL_FOLDED:
             await self._award_to_last_remaining()
@@ -279,11 +279,13 @@ class PokerGame:
                     self._pot_manager.add_contribution(action_pid, delta, ps.is_all_in)
 
             action_player_name = self._players[action_pid].name if action_pid in self._players else action_pid
-            await self._broadcast("action_taken", lambda pid, _ap=action_pid, _an=action_player_name, _a=action, _amt=amount: {
+            _ps_bet = ps.bet if ps else 0
+            await self._broadcast("action_taken", lambda pid, _ap=action_pid, _an=action_player_name, _a=action, _amt=amount, _bet=_ps_bet: {
                 "player_id": _ap,
                 "name": _an,
                 "action": _a.value,
                 "amount": _amt,
+                "bet": _bet,
                 "pot": self.state.pot,
             })
 

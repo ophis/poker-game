@@ -4,6 +4,25 @@
 {% block extra_head %}
 <meta name="game-id" content="{{ game_id }}" />
 <meta name="variant" content="{{ variant }}" />
+<style>
+  .mute-btn {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 1000;
+    background: rgba(0,0,0,0.45);
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 1.3rem;
+    padding: 4px 8px;
+    cursor: pointer;
+    opacity: 0.75;
+    line-height: 1;
+    transition: opacity 0.15s;
+  }
+  .mute-btn:hover { opacity: 1; }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -57,7 +76,7 @@
 
   <!-- Action history panel -->
   <div id="action-history" class="history-panel collapsed">
-    <div class="history-header" id="history-toggle">History</div>
+    <div class="history-header" id="history-toggle">History ▶</div>
     <div id="history-messages" class="history-messages"></div>
   </div>
 
@@ -73,6 +92,9 @@
     </div>
   </div>
 
+  <!-- Mute toggle button -->
+  <button id="mute-btn" class="mute-btn" title="Toggle sound">🔊</button>
+
   <!-- Winner announcement overlay -->
   <div id="winner-overlay" class="winner-overlay" style="display:none;">
     <div class="winner-content">
@@ -87,5 +109,13 @@
 <script src="/static/js/state.js"></script>
 <script src="/static/js/renderer.js"></script>
 <script src="/static/js/controls.js"></script>
+<script src="/static/js/audio.js"></script>
 <script src="/static/js/websocket.js"></script>
+<script>
+  document.getElementById('mute-btn').addEventListener('click', function () {
+    const muted = window.SoundManager.toggleMute();
+    this.textContent = muted ? '🔇' : '🔊';
+    window.SoundManager.resume();
+  });
+</script>
 {% endblock %}

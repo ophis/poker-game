@@ -451,7 +451,8 @@ body {
 }
 
 .history-panel.collapsed { height: 40px; overflow: hidden; min-height: 40px; max-height: 40px; }
-.history-panel:not(.collapsed) { height: 300px; }
+.history-panel:not(.collapsed):not(.tall) { height: 300px; }
+.history-panel.tall { height: 65vh; }
 
 .history-header {
   padding: 8px 12px;

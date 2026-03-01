@@ -11,7 +11,7 @@ def next_active_seat(players: List[PlayerState], from_index: int) -> int:
     for offset in range(1, n + 1):
         idx = (from_index + offset) % n
         p = players[idx]
-        if not p.is_sitting_out and p.chips > 0:
+        if not p.is_folded and not p.is_sitting_out and p.chips > 0:
             return idx
     return -1
 

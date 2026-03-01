@@ -158,6 +158,15 @@ class TestFirstToAct:
         idx = first_to_act_postflop(state)
         assert idx == 2
 
+    def test_postflop_skips_folded(self):
+        # Regression: folded players must be skipped postflop, otherwise
+        # _run_betting_round returns ROUND_COMPLETE immediately and the
+        # human never gets action buttons.
+        state = _make_state(num_players=3, dealer_index=0)
+        state.players[1].is_folded = True
+        idx = first_to_act_postflop(state)
+        assert idx == 2
+
 
 class TestGameStateProperties:
     def test_active_players(self):

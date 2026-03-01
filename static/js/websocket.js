@@ -60,6 +60,7 @@ window.PokerWS = (() => {
         window.Renderer.render();
         window.Renderer.hideActions();
         window.Renderer.showHandName('');
+        window.SoundManager.play('deal');
         break;
 
       case 'community_card': {
@@ -69,6 +70,7 @@ window.PokerWS = (() => {
         }
         window.GameState.applyGameState(payload);
         window.Renderer.render();
+        window.SoundManager.play('deal');
         break;
       }
 
@@ -79,12 +81,18 @@ window.PokerWS = (() => {
             validActions: payload.valid_actions,
           });
           window.Renderer.showActions(payload.valid_actions);
+          window.SoundManager.play('yourTurn');
         }
         break;
 
       case 'action_taken':
-        // Update pot immediately
+        // Update pot and the acting player's current street bet
         window.GameState.update({ pot: payload.pot });
+        if (payload.bet !== undefined) {
+          const _s = window.GameState.get();
+          const _p = _s.players.find(p => p.player_id === payload.player_id);
+          if (_p) _p.bet = payload.bet;
+        }
         window.GameState.addAction({
           type: 'action',
           name: payload.name,
@@ -96,6 +104,12 @@ window.PokerWS = (() => {
         if (payload.player_id === _playerId) {
           window.Renderer.hideActions();
           window.GameState.update({ myTurn: false });
+        }
+        {
+          const a = payload.action;
+          if (a === 'fold') window.SoundManager.play('fold');
+          else if (a === 'check') window.SoundManager.play('check');
+          else if (a === 'call' || a === 'raise' || a === 'all_in') window.SoundManager.play('chip');
         }
         break;
 
@@ -114,6 +128,11 @@ window.PokerWS = (() => {
           });
         });
         window.GameState.update({ lastWinners: payload });
+        if (winners.some(w => w.player_id === _playerId)) {
+          window.SoundManager.play('win');
+        } else {
+          window.SoundManager.play('lose');
+        }
         // Reveal all players' hole cards in the seats for the showdown.
         // The server sends all_hands explicitly here — this is the only place
         // opponent cards are revealed, keeping game_state snapshots private.

@@ -119,7 +119,22 @@ window.Controls = (() => {
   function _bindHistoryToggle() {
     document.getElementById('history-toggle')?.addEventListener('click', () => {
       const panel = document.getElementById('action-history');
-      if (panel) panel.classList.toggle('collapsed');
+      const header = document.getElementById('history-toggle');
+      if (!panel) return;
+      if (panel.classList.contains('collapsed')) {
+        // collapsed → normal
+        panel.classList.remove('collapsed', 'tall');
+        if (header) header.textContent = 'History ▼';
+      } else if (panel.classList.contains('tall')) {
+        // tall → collapsed
+        panel.classList.add('collapsed');
+        panel.classList.remove('tall');
+        if (header) header.textContent = 'History ▶';
+      } else {
+        // normal → tall
+        panel.classList.add('tall');
+        if (header) header.textContent = 'History ▲';
+      }
     });
   }
 

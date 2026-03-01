@@ -6,6 +6,8 @@
  */
 window.Renderer = (() => {
 
+  let _autoDismissTimer = null;
+
   // ---- Suit helpers --------------------------------------------------------
   const SUIT_SYMBOLS = { s: '♠', h: '♥', d: '♦', c: '♣' };
   const RED_SUITS    = new Set(['h', 'd']);
@@ -325,15 +327,32 @@ window.Renderer = (() => {
 
     overlay.style.display = 'flex';
 
-    // Add close button
+    // Cancel any pending auto-dismiss from a previous no-showdown hand
+    if (_autoDismissTimer !== null) {
+      clearTimeout(_autoDismissTimer);
+      _autoDismissTimer = null;
+    }
+
     const content = overlay.querySelector('.winner-content');
     let closeBtn = content.querySelector('.winner-close');
-    if (!closeBtn) {
-      closeBtn = document.createElement('button');
-      closeBtn.className = 'winner-close';
-      closeBtn.textContent = '\u00D7';
-      closeBtn.addEventListener('click', () => { overlay.style.display = 'none'; });
-      content.appendChild(closeBtn);
+
+    if (isShowdown) {
+      // Real showdown: show X button, require manual dismiss
+      if (!closeBtn) {
+        closeBtn = document.createElement('button');
+        closeBtn.className = 'winner-close';
+        closeBtn.textContent = '\u00D7';
+        closeBtn.addEventListener('click', () => { overlay.style.display = 'none'; });
+        content.appendChild(closeBtn);
+      }
+      closeBtn.style.display = '';
+    } else {
+      // No cards to show (last player standing): hide X and auto-dismiss after 2s
+      if (closeBtn) closeBtn.style.display = 'none';
+      _autoDismissTimer = setTimeout(() => {
+        overlay.style.display = 'none';
+        _autoDismissTimer = null;
+      }, 2000);
     }
   }
 
