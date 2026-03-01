@@ -134,9 +134,25 @@ class PokerGame:
             await asyncio.sleep(1)
             await self._run_hand()
 
+            # Mark busted players immediately after each hand
+            for p in self.state.players:
+                if p.chips == 0 and not p.is_sitting_out:
+                    p.is_sitting_out = True
+
             self.state.phase = GamePhase.HAND_OVER
             await self._broadcast("hand_over", self._state_payload_factory)
             await asyncio.sleep(3)
+
+            # End the game when only one player has chips
+            if len(self.state.seated_players) < 2:
+                remaining = self.state.seated_players
+                winner = remaining[0] if remaining else None
+                winner_payload = {
+                    "winner_name": winner.name if winner else "",
+                    "winner_chips": winner.chips if winner else 0,
+                }
+                await self._broadcast("game_over", lambda pid: winner_payload)
+                break
 
     async def _run_hand(self) -> None:
         """Run a single hand from deal to showdown."""
@@ -150,11 +166,6 @@ class PokerGame:
             p.total_bet = 0
             p.is_folded = False
             p.is_all_in = False
-
-        # Remove busted players
-        for p in self.state.players:
-            if p.chips == 0 and not p.is_sitting_out:
-                p.is_sitting_out = True
 
         # Advance dealer
         advance_dealer(self.state)

@@ -481,6 +481,18 @@ body {
 .hist-raise { color: var(--gold); }
 .hist-allin { color: #ff6060; font-weight: bold; }
 
+.hist-separator {
+  text-align: center;
+  color: var(--gold);
+  font-size: 0.72rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  margin: 8px 0 4px;
+  border-top: 1px solid rgba(212,175,55,0.4);
+  border-bottom: 1px solid rgba(212,175,55,0.4);
+  padding: 3px 0;
+}
+
 .hist-phase {
   text-align: center;
   color: rgba(255,255,255,0.35);

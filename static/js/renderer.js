@@ -196,7 +196,10 @@ window.Renderer = (() => {
       const entry = history[i];
       const div = document.createElement('div');
 
-      if (entry.type === 'phase') {
+      if (entry.type === 'separator') {
+        div.className = 'hist-separator';
+        div.textContent = '— New Hand —';
+      } else if (entry.type === 'phase') {
         div.className = 'hist-phase';
         div.textContent = `\u2014 ${entry.text} \u2014`;
       } else if (entry.type === 'winner') {
@@ -334,6 +337,25 @@ window.Renderer = (() => {
     }
   }
 
+  function showGameOver(winnerName, winnerChips) {
+    const overlay = document.getElementById('winner-overlay');
+    const title   = document.getElementById('winner-title');
+    const details = document.getElementById('winner-details');
+    if (!overlay) return;
+    title.textContent = `\uD83C\uDFC6 ${winnerName} wins the game!`;
+    details.textContent = `Final stack: $${Number(winnerChips).toLocaleString()}`;
+    overlay.style.display = 'flex';
+    const content = overlay.querySelector('.winner-content');
+    let closeBtn = content.querySelector('.winner-close');
+    if (!closeBtn) {
+      closeBtn = document.createElement('button');
+      closeBtn.className = 'winner-close';
+      closeBtn.textContent = '\u00D7';
+      closeBtn.addEventListener('click', () => { overlay.style.display = 'none'; });
+      content.appendChild(closeBtn);
+    }
+  }
+
   // ---- Player action labels ------------------------------------------------
   // Store labels as data so they survive seat re-renders
   const _actionLabels = {};  // playerId -> { text, cssClass, timer }
@@ -445,6 +467,7 @@ window.Renderer = (() => {
   return {
     render,
     showWinner,
+    showGameOver,
     showActions,
     hideActions,
     showHandName,

@@ -53,7 +53,7 @@ window.PokerWS = (() => {
         break;
 
       case 'hand_starting':
-        window.GameState.clearActions();
+        window.GameState.addAction({ type: 'separator' });
         window.GameState.applyGameState(payload);
         window.GameState.update({ lastWinners: null, myTurn: false, validActions: null });
         window.Renderer.clearActionLabels();
@@ -127,6 +127,8 @@ window.PokerWS = (() => {
           });
           window.Renderer.render();
         }
+        window.Renderer.hideActions();
+        window.GameState.update({ myTurn: false });
         window.Renderer.showWinner(payload);
         break;
       }
@@ -148,6 +150,12 @@ window.PokerWS = (() => {
             if (badge) badge.style.display = 'inline';
           }
         }
+        break;
+
+      case 'game_over':
+        window.Renderer.hideActions();
+        window.GameState.update({ myTurn: false });
+        window.Renderer.showGameOver(payload.winner_name, payload.winner_chips);
         break;
 
       case 'error':
