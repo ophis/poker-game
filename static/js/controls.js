@@ -13,6 +13,7 @@ window.Controls = (() => {
     _bindChat();
     _bindChatToggle();
     _bindHistoryToggle();
+    _bindHistoryResize();
   }
 
   function _bindActionButtons() {
@@ -119,22 +120,42 @@ window.Controls = (() => {
   function _bindHistoryToggle() {
     document.getElementById('history-toggle')?.addEventListener('click', () => {
       const panel = document.getElementById('action-history');
-      const header = document.getElementById('history-toggle');
       if (!panel) return;
-      if (panel.classList.contains('collapsed')) {
-        // collapsed → normal
-        panel.classList.remove('collapsed', 'tall');
-        if (header) header.textContent = 'History ▼';
-      } else if (panel.classList.contains('tall')) {
-        // tall → collapsed
-        panel.classList.add('collapsed');
-        panel.classList.remove('tall');
-        if (header) header.textContent = 'History ▶';
-      } else {
-        // normal → tall
-        panel.classList.add('tall');
-        if (header) header.textContent = 'History ▲';
-      }
+      panel.classList.toggle('collapsed');
+    });
+  }
+
+  function _bindHistoryResize() {
+    const handle = document.getElementById('history-resize');
+    const panel  = document.getElementById('action-history');
+    if (!handle || !panel) return;
+
+    const MIN_H = 80;
+    let dragging = false;
+    let startY = 0;
+    let startH = 0;
+
+    handle.addEventListener('mousedown', function(e) {
+      if (e.button !== 0) return;
+      dragging = true;
+      startY   = e.clientY;
+      startH   = panel.offsetHeight;
+      document.body.style.userSelect = 'none';
+      e.preventDefault();
+    });
+
+    // Permanent document listeners — never added/removed, never missed
+    document.addEventListener('mousemove', function(e) {
+      if (!dragging) return;
+      const maxH = Math.floor(window.innerHeight * 0.88);
+      const newH = Math.max(MIN_H, Math.min(maxH, startH + startY - e.clientY));
+      panel.style.height = newH + 'px';
+    });
+
+    document.addEventListener('mouseup', function() {
+      if (!dragging) return;
+      dragging = false;
+      document.body.style.userSelect = '';
     });
   }
 
