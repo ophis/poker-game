@@ -93,6 +93,11 @@ window.PokerWS = (() => {
           const _p = _s.players.find(p => p.player_id === payload.player_id);
           if (_p) _p.bet = payload.bet;
         }
+        if (payload.action === 'fold') {
+          const _s = window.GameState.get();
+          const _p = _s.players.find(p => p.player_id === payload.player_id);
+          if (_p) _p.is_folded = true;
+        }
         window.GameState.addAction({
           type: 'action',
           name: payload.name,
